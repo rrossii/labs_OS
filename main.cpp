@@ -12,7 +12,7 @@ typedef long long ll;
 string readTextFromFile(const string &fileName);
 void saveResToFile(const string &fileName, ll exeTime);
 DWORD WINAPI findLongestSentence(LPVOID param);
-string divideText(const string &text, int numThreads);
+vector<string> divideText(const string &text, int numThreads);
 VOID multiThread(int numThreads, const string &divText);
 
 string longestSentence;
@@ -32,16 +32,46 @@ int main() {
     //cin >> numThreads;
 
     string text = readTextFromFile(inputFile);
-    multiThread(2, text);
+    vector<string> dividedText = divideText(text, 4);
+
     cout << longestSentence;
 
     auto end = chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds> (end-start);
+    //cout << duration.count();
 //    saveResToFile(outputFile, duration.count());
 
 	return 0;
 }
+vector<string> divideText(const string &text, int numThreads) {
+    size_t n = text.size();
+    DWORD divIndex = n / numThreads, startIndex = 0, end = 0;
+    vector<string> dividedText;
 
+    while (numThreads >= 1) {
+
+        if (text[divIndex] != '.') {
+            auto dotIter = text.find_first_of('.', divIndex);
+            end = dotIter - startIndex + 1;
+
+            string divText = text.substr(startIndex, end);
+            dividedText.emplace_back(divText);
+
+            startIndex = dotIter + 1;
+            divIndex = (dotIter + n) / numThreads;
+
+        } else {
+            end = divIndex - startIndex + 1;
+            string divText = text.substr(startIndex, end);
+            dividedText.emplace_back(divText);
+
+            startIndex = divIndex + 1;
+            divIndex = (divIndex + n) / numThreads;
+        }
+        numThreads--;
+    }
+    return dividedText;
+}
 
 DWORD WINAPI findLongestSentence(LPVOID param) {
     int wordsCount = 0, wc = 0;
@@ -70,7 +100,7 @@ DWORD WINAPI findLongestSentence(LPVOID param) {
    ExitThread(0);
 }
 
-VOID multiThread(int numThreads, const string &divText) {
+VOID multiThread(int numThreads, const string &divText) { // take out numThreads later
     HANDLE threads[numThreads];
 
     for (int i = 0; i < numThreads; i++) {
