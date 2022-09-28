@@ -5,6 +5,7 @@
 #include <chrono>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 using namespace std;
 
 typedef long long ll;
@@ -13,32 +14,34 @@ string readTextFromFile(const string &fileName);
 void saveResToFile(const string &fileName, ll exeTime);
 DWORD WINAPI findLongestSentence(LPVOID param);
 vector<string> divideText(const string &text, int numThreads);
-VOID multiThread(int numThreads, const string &divText);
+VOID multiThread(vector<string> &divText);
 
 string longestSentence;
 
-struct textStruct {
-    string text;
-};
-
 int main() {
-    auto start = chrono::high_resolution_clock::now();
+//    auto start = chrono::high_resolution_clock::now();
 
-    string inputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\text.txt)";
+//    string inputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\text.txt)";
+//    string inputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\text1.txt)";
+    string inputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\text2.txt)";
     string outputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\output.txt)";
 
 //    cout << "Input a number of threads (2, 4, 8, 20, 100, 1000):\n";
 //    int numThreads = 1;
-    //cin >> numThreads;
+//    cin >> numThreads;
 
     string text = readTextFromFile(inputFile);
-    vector<string> dividedText = divideText(text, 4);
+    //findLongestSentence(&text); // 1 thread
+    vector<string> dividedText = divideText(text, 1000);
 
+    auto start = chrono::high_resolution_clock::now();
+
+    multiThread(dividedText);
     cout << longestSentence;
 
     auto end = chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds> (end-start);
-    //cout << duration.count();
+    cout << duration.count();
 //    saveResToFile(outputFile, duration.count());
 
 	return 0;
@@ -87,7 +90,10 @@ DWORD WINAPI findLongestSentence(LPVOID param) {
 
             if (wordsCount > wc) {
                 end = i - start + 1; // number of chars
-                longestSentence = text.substr(start, end);
+                string tmp = text.substr(start, end);
+                if (count(tmp.begin(), tmp.end(), ' ') > count(longestSentence.begin(), longestSentence.end(), ' ')) {
+                    longestSentence = text.substr(start, end);
+                }
                 wc = wordsCount;
             }
             start = i+1;
@@ -97,21 +103,26 @@ DWORD WINAPI findLongestSentence(LPVOID param) {
             wordsCount++;
         }
     }
-   ExitThread(0);
+    ExitThread(0);
 }
 
-VOID multiThread(int numThreads, const string &divText) { // take out numThreads later
-    HANDLE threads[numThreads];
+VOID multiThread(vector<string> &divText) {
+    size_t n = divText.size();
+    HANDLE threads[n];
 
-    for (int i = 0; i < numThreads; i++) {
+    for (int i = 0; i < n; i++) {
         threads[i] = CreateThread(NULL,
                                   0,
                                   findLongestSentence,
-                                  (LPVOID) &divText,
+                                  (LPVOID) &divText[i],
                                   0,
                                   NULL);
     }
-    WaitForMultipleObjects(numThreads, threads, TRUE, INFINITE);
+    WaitForMultipleObjects(n, threads, TRUE, INFINITE);
+
+    for (int i = 0; i < n; i++) {
+        CloseHandle(threads[i]);
+    }
 }
 
 string readTextFromFile(const string &fileName) {
