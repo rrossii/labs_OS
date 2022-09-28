@@ -1,0 +1,2 @@
+The longest sentence in C:\Users\annro\CLionProjects\lab3_OS\output.txt is  hi hi hi kek lol.
+Execution time: 351ms
