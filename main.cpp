@@ -16,7 +16,7 @@ string readTextFromFile(const string &fileName);
 void saveResToFile(const string &fileName, const string &text, ll exeTime, size_t numberOfThreads);
 DWORD WINAPI findLongestSentence(LPVOID threadData);
 vector<string> divideTextIntoChunksOfSentences(const string &text, size_t parts);
-VOID runCalculatingThreads(vector<string> &chunksOfSentences);
+VOID runCalculatingThreads(vector<string> &chunksOfSentences, int priority);
 size_t CountWords(const string &sentence);
 void RunNThreads(size_t numberOfThreads);
 void deleteUnnecessarySymbols(string &text);
@@ -174,23 +174,35 @@ void deleteUnnecessarySymbols(string &text) {
     text.erase(iter, text.end() );
 }
 
-VOID runCalculatingThreads(vector<string> &chunksOfSentences) {
+VOID runCalculatingThreads(vector<string> &chunksOfSentences, int priority) {
     size_t numberOfChunks = chunksOfSentences.size();
     HANDLE threads[numberOfChunks];
+    HANDLE openThreads;
+    DWORD threadID[numberOfChunks];
 
     SentenceAndThread sentenceAndNumberOfThread;
     for (size_t i = 0; i < numberOfChunks; i++) {
         sentenceAndNumberOfThread.sentence = chunksOfSentences[i];
         sentenceAndNumberOfThread.thread = i;
 
-        //deleteUnnecessarySymbols(sentenceAndNumberOfThread.sentence);
-
         threads[i] = CreateThread(NULL,
                                   0,
                                   findLongestSentence,
                                   (LPVOID) &sentenceAndNumberOfThread,
-                                  0,
-                                  NULL);
+                                  CREATE_SUSPENDED,
+                                  &threadID[i]);
+//
+//        openThreads = OpenThread(THREAD_SET_INFORMATION,
+//                                    FALSE,
+//                                    threadID[i]);
+
+//        if (openThreads == NULL) {
+//            cerr << "Open thread " << i << " failed, error is " << GetLastError() << '\n';
+//        }
+        SetThreadPriority(threads[i], priority);
+
+        ResumeThread(threads[i]);
+//        WaitForSingleObject(openThreads, INFINITE);
         WaitForSingleObject(threads[i], INFINITE);
     }
     WaitForMultipleObjects(numberOfChunks, threads, TRUE, INFINITE);
@@ -202,8 +214,8 @@ VOID runCalculatingThreads(vector<string> &chunksOfSentences) {
 
 void RunNThreads(size_t numberOfThreads) {
 //    string inputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\text.txt)";
-//    string inputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\text1.txt)";
-    string inputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\text2.txt)";
+    string inputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\text1.txt)";
+//    string inputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\text2.txt)";
     string text = readTextFromFile(inputFile);
 
     deleteUnnecessarySymbols(text);
@@ -212,16 +224,14 @@ void RunNThreads(size_t numberOfThreads) {
 
     auto startTime = CurrentTimeMillis();
 
-    runCalculatingThreads(chunksOfSentences);
+    runCalculatingThreads(chunksOfSentences, THREAD_PRIORITY_HIGHEST);
 
     auto endTime = CurrentTimeMillis();
 
     auto longest = LongestSentenceInVector(sentencesFoundByThreads);
-    printf("Longest sentence size = [%llu]\nSentence = [%s]\n", CountWords(longest), longest.c_str());
-    printf("Executing time for [%llu] threads is [%llu]ms\n\n", numberOfThreads, endTime - startTime);
 
     string outputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\output.txt)";
-    //saveResToFile(outputFile, longest, endTime - startTime, numberOfThreads);
+    saveResToFile(outputFile, longest, endTime - startTime, numberOfThreads);
 }
 
 string readTextFromFile(const string &fileName) {
