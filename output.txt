@@ -1,2 +1,28 @@
-The longest sentence in C:\Users\annro\CLionProjects\lab3_OS\output.txt is  hi hi hi kek lol.
-Execution time: 351ms
+Longest sentence size = [20]
+Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
+Executing time for [1] threads is [501]ms
+
+Longest sentence size = [20]
+Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
+Executing time for [2] threads is [503]ms
+
+Longest sentence size = [20]
+Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
+Executing time for [4] threads is [500]ms
+
+Longest sentence size = [20]
+Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
+Executing time for [8] threads is [501]ms
+
+Longest sentence size = [20]
+Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
+Executing time for [20] threads is [507]ms
+
+Longest sentence size = [20]
+Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
+Executing time for [100] threads is [508]ms
+
+Longest sentence size = [20]
+Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
+Executing time for [1000] threads is [769]ms
+

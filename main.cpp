@@ -13,9 +13,9 @@ using namespace std;
 typedef long long ll;
 
 string readTextFromFile(const string &fileName);
-void saveResToFile(const string &fileName, ll exeTime);
+void saveResToFile(const string &fileName, const string &text, ll exeTime, size_t numberOfThreads);
 DWORD WINAPI findLongestSentence(LPVOID threadData);
-vector<string> divideText(const string &text, int parts);
+vector<string> divideTextIntoChunksOfSentences(const string &text, size_t parts);
 VOID runCalculatingThreads(vector<string> &chunksOfSentences);
 size_t CountWords(const string &sentence);
 void RunNThreads(size_t numberOfThreads);
@@ -52,7 +52,8 @@ vector<string> divideTextIntoChunksOfSentences(const string &text, size_t parts)
 
     size_t numberOfSentencesInText = endOfSentence.size();
 
-    size_t startOfSentence = 0, index = 0;
+    size_t startOfSentence = 0;
+    int index = 0;
     size_t indexOfEndOfSentence = endOfSentence[index];
     if (endOfSentence.size() <= parts) {
         for (size_t i = 0; i < numberOfSentencesInText; i++) {
@@ -64,27 +65,39 @@ vector<string> divideTextIntoChunksOfSentences(const string &text, size_t parts)
             indexOfEndOfSentence = endOfSentence[index];
         }
     } else {
+        index = -1; // -1 + numberOfSentencesInOneMultiSentence (на початку речення, коли індекс 0, рахуватиме неправильно)
         size_t numberOfSentencesInOneMultiSentence = numberOfSentencesInText / parts;
         size_t leftoverSentences = numberOfSentencesInText % parts;
 
         for (size_t i = 0; i < parts; i++) {
-            string multiSentence;
-            for (size_t j = 0; j < numberOfSentencesInOneMultiSentence; j++) {
-
-                size_t numOfCharsToEmplace = indexOfEndOfSentence - startOfSentence + 1;
-                multiSentence += text.substr(startOfSentence, numOfCharsToEmplace);
-
-                startOfSentence = indexOfEndOfSentence + 1;
-                index++;
-                indexOfEndOfSentence = endOfSentence[index];
+            if (index + 1 >= numberOfSentencesInText) {
+                break;
             }
+            string multiSentence;
+            indexOfEndOfSentence = endOfSentence[index + numberOfSentencesInOneMultiSentence];
+            size_t numOfCharsToEmplace = indexOfEndOfSentence - startOfSentence + 1;
+
+            multiSentence += text.substr(startOfSentence, numOfCharsToEmplace);
+            index += numberOfSentencesInOneMultiSentence;
+            startOfSentence = indexOfEndOfSentence;
+
             dividedText.emplace_back(multiSentence);
         }
 
-        if (leftoverSentences != 0) {
-            size_t divSize = dividedText.size();
-            size_t numOfCharsTilEnd = endOfSentence[numberOfSentencesInText - 1] - startOfSentence + 1;
-            dividedText[divSize - 1] += text.substr(startOfSentence, numOfCharsTilEnd);
+        index = startOfSentence;
+        for (size_t i = 0; i < leftoverSentences; i++) {
+            if (index + 1 >= numberOfSentencesInText) {
+                break;
+            }
+            string multiSentence;
+            indexOfEndOfSentence = endOfSentence[index + 1];
+            size_t numOfCharsToEmplace = indexOfEndOfSentence - startOfSentence + 1;
+
+            multiSentence += text.substr(startOfSentence, numOfCharsToEmplace);
+            index++;
+            startOfSentence = indexOfEndOfSentence;
+
+            dividedText[i] += multiSentence;
         }
     }
 
@@ -150,8 +163,8 @@ DWORD WINAPI findLongestSentence(LPVOID threadData) {
     string longest = FindLongestSentenceInText(text); // the longest sentence in chunk
     sentencesFoundByThreads[threadNum] = longest;
 
-//    ExitThread(0);
-    return 0;
+    ExitThread(0);
+//    return 0;
 }
 
 void deleteUnnecessarySymbols(string &text) {
@@ -170,7 +183,7 @@ VOID runCalculatingThreads(vector<string> &chunksOfSentences) {
         sentenceAndNumberOfThread.sentence = chunksOfSentences[i];
         sentenceAndNumberOfThread.thread = i;
 
-        deleteUnnecessarySymbols(sentenceAndNumberOfThread.sentence);
+        //deleteUnnecessarySymbols(sentenceAndNumberOfThread.sentence);
 
         threads[i] = CreateThread(NULL,
                                   0,
@@ -189,10 +202,11 @@ VOID runCalculatingThreads(vector<string> &chunksOfSentences) {
 
 void RunNThreads(size_t numberOfThreads) {
 //    string inputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\text.txt)";
-    string inputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\text1.txt)";
-//    string inputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\text2.txt)";
-    const string text = readTextFromFile(inputFile);
+//    string inputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\text1.txt)";
+    string inputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\text2.txt)";
+    string text = readTextFromFile(inputFile);
 
+    deleteUnnecessarySymbols(text);
     vector<string> chunksOfSentences = divideTextIntoChunksOfSentences(text, numberOfThreads);
     sentencesFoundByThreads.assign(chunksOfSentences.size(), "");
 
@@ -204,11 +218,10 @@ void RunNThreads(size_t numberOfThreads) {
 
     auto longest = LongestSentenceInVector(sentencesFoundByThreads);
     printf("Longest sentence size = [%llu]\nSentence = [%s]\n", CountWords(longest), longest.c_str());
-
     printf("Executing time for [%llu] threads is [%llu]ms\n\n", numberOfThreads, endTime - startTime);
 
     string outputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\output.txt)";
-    //    saveResToFile(outputFile, duration.count());
+    //saveResToFile(outputFile, longest, endTime - startTime, numberOfThreads);
 }
 
 string readTextFromFile(const string &fileName) {
@@ -226,11 +239,12 @@ string readTextFromFile(const string &fileName) {
     return ss.str();
 }
 
-void saveResToFile(const string &fileName, ll exeTime, const string &text) {
+void saveResToFile(const string &fileName, const string &text, ll exeTime, size_t numberOfThreads) {
     fstream output;
-    output.open(fileName);
+    output.open(fileName, std::ios_base::app);
 
-    output << "The longest sentence in " << fileName << " is " << text << '\n';
-    output << "Execution time: " << exeTime << "ms\n";
+    output << "Longest sentence size = [" << CountWords(text) << "]\nSentence = [" << text << "]\n";
+    output << "Executing time for [" <<  numberOfThreads << "] threads is [" << exeTime << "]ms\n\n";
+
     output.close();
 }
