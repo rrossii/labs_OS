@@ -19,6 +19,7 @@ vector<string> divideText(const string &text, int parts);
 VOID runCalculatingThreads(vector<string> &chunksOfSentences);
 size_t CountWords(const string &sentence);
 void RunNThreads(size_t numberOfThreads);
+void deleteUnnecessarySymbols(string &text);
 string LongestSentenceInVector(const vector<string> &sentences);
 
 vector<string> sentencesFoundByThreads;
@@ -153,14 +154,23 @@ DWORD WINAPI findLongestSentence(LPVOID threadData) {
     return 0;
 }
 
+void deleteUnnecessarySymbols(string &text) {
+    string::iterator iter = unique(text.begin(), text.end(), [](auto lhs, auto rhs){
+        return lhs == rhs && lhs == ' '; // add later \n also
+    });
+    text.erase(iter, text.end() );
+}
+
 VOID runCalculatingThreads(vector<string> &chunksOfSentences) {
     size_t numberOfChunks = chunksOfSentences.size();
     HANDLE threads[numberOfChunks];
 
     SentenceAndThread sentenceAndNumberOfThread;
-    for (int i = 0; i < numberOfChunks; i++) {
+    for (size_t i = 0; i < numberOfChunks; i++) {
         sentenceAndNumberOfThread.sentence = chunksOfSentences[i];
         sentenceAndNumberOfThread.thread = i;
+
+        deleteUnnecessarySymbols(sentenceAndNumberOfThread.sentence);
 
         threads[i] = CreateThread(NULL,
                                   0,
@@ -172,15 +182,15 @@ VOID runCalculatingThreads(vector<string> &chunksOfSentences) {
     }
     WaitForMultipleObjects(numberOfChunks, threads, TRUE, INFINITE);
 
-    for (int i = 0; i < numberOfChunks; i++) {
+    for (size_t i = 0; i < numberOfChunks; i++) {
         CloseHandle(threads[i]);
     }
 }
 
 void RunNThreads(size_t numberOfThreads) {
 //    string inputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\text.txt)";
-//    string inputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\text1.txt)";
-    string inputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\text2.txt)";
+    string inputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\text1.txt)";
+//    string inputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\text2.txt)";
     const string text = readTextFromFile(inputFile);
 
     vector<string> chunksOfSentences = divideTextIntoChunksOfSentences(text, numberOfThreads);
@@ -190,10 +200,11 @@ void RunNThreads(size_t numberOfThreads) {
 
     runCalculatingThreads(chunksOfSentences);
 
+    auto endTime = CurrentTimeMillis();
+
     auto longest = LongestSentenceInVector(sentencesFoundByThreads);
     printf("Longest sentence size = [%llu]\nSentence = [%s]\n", CountWords(longest), longest.c_str());
 
-    auto endTime = CurrentTimeMillis();
     printf("Executing time for [%llu] threads is [%llu]ms\n\n", numberOfThreads, endTime - startTime);
 
     string outputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\output.txt)";
