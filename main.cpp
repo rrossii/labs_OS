@@ -261,9 +261,8 @@ void limitThreads(size_t numOfThreads, vector<string> &chunksOfSentences) {
     CloseHandle(hSemaphore);
 }
 
-DWORD WINAPI findLongestSentence(LPVOID *threadData) { // no *
+DWORD WINAPI findLongestSentence(LPVOID threadData) {
     //WaitForSingleObject(hSemaphore, INFINITE); //not inf but 0L
-
     WaitForSingleObject(hMutex, INFINITE);
     struct SentenceAndThread *tData =(struct SentenceAndThread *) threadData;
     string text = tData->sentence;
