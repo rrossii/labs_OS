@@ -14,6 +14,7 @@ typedef long long ll;
 
 string readTextFromFile(const string &fileName);
 void saveResToFile(const string &fileName, const string &text, ll exeTime, size_t numberOfThreads);
+void saveResLimitToFile(const string &fileName, const string &text, ll exeTime, size_t numberOfThreads, size_t limitedThreads);
 DWORD WINAPI findLongestSentence(LPVOID threadData);
 vector<string> divideTextIntoChunksOfSentences(const string &text, size_t parts);
 VOID runCalculatingThreads(vector<string> &chunksOfSentences, int priority);
@@ -36,10 +37,10 @@ uint64_t CurrentTimeMillis() {
 int main() {
 //    RunNThreads(1);
 //    RunNThreads(2);
-    //RunNThreads(4);
-//    RunNThreads(8);
-    RunNThreads(20);
-//    RunNThreads(100);
+//    RunNThreads(4);
+    //RunNThreads(8);
+    //RunNThreads(20);
+    RunNThreads(100);
 //    RunNThreads(1000);
     return 0;
 }
@@ -169,26 +170,28 @@ void RunNThreads(size_t numberOfThreads) {
 
     auto startTime = CurrentTimeMillis();
 
-    runCalculatingThreads(chunksOfSentences, THREAD_PRIORITY_HIGHEST);
+    runCalculatingThreads(chunksOfSentences, THREAD_PRIORITY_IDLE);
 
     auto endTime = CurrentTimeMillis();
 
     auto longest = LongestSentenceInVector(sentencesFoundByThreads);
+    cout << longest << '\n';
 
     string outputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\output.txt)";
     saveResToFile(outputFile, longest, endTime - startTime, numberOfThreads);
     sentencesFoundByThreads.clear();
 
+
     startTime = CurrentTimeMillis();
 
-    size_t limitedNumOfThread = 5;
+    size_t limitedNumOfThread = 2;
     limitThreads(limitedNumOfThread, chunksOfSentences);
 
     endTime = CurrentTimeMillis();
 
     longest = LongestSentenceInVector(sentencesFoundByThreads);
 
-    saveResToFile(outputFile, longest, endTime - startTime, limitedNumOfThread);
+    saveResLimitToFile(outputFile, longest, endTime - startTime, numberOfThreads, limitedNumOfThread);
     sentencesFoundByThreads.clear();
 }
 
@@ -203,83 +206,92 @@ struct SentenceAndThread {
 };
 
 void limitThreads(size_t numOfThreads, vector<string> &chunksOfSentences) {
-    if (numOfThreads > chunksOfSentences.size()) {
-        cerr << "Cannot divide text where the number of sentences (" << chunksOfSentences.size() << ") is less than number of threads (" << numOfThreads << ")\n";
-        return;
-    }
-
-    HANDLE threads[numOfThreads];
     hSemaphore = CreateSemaphore(
             NULL,
-            0, //or 1
+            0, // or 1
             numOfThreads,
             NULL);
 
-    size_t chunkSize = chunksOfSentences.size();
-    size_t sentencesInChunk = chunkSize / numOfThreads;
-    size_t k = 0;
-    SentenceAndThread sentenceAndNumberOfThread;
-    for (size_t i = 0; i < numOfThreads; i++) {
-        string multiSentence;
-
-        for (size_t j = k; j < sentencesInChunk; j++) {
-            multiSentence += chunksOfSentences[j];
-        }
-
-        k = sentencesInChunk;
-        sentencesInChunk += chunkSize / numOfThreads;
-
-        if (chunkSize - sentencesInChunk < chunkSize / numOfThreads) {
-            sentencesInChunk -= chunkSize / numOfThreads; // back
-            for (size_t l = sentencesInChunk; l < chunkSize; l++) { // or sentInChunk+1
-                multiSentence += chunksOfSentences[l];
-            }
-        }
-
-        sentenceAndNumberOfThread.sentence = multiSentence;
-
-        //WaitForSingleObject(hSemaphore, INFINITE);
-
-        threads[i] = CreateThread(
-                NULL,
-                0,
-                findLongestSentence,
-                (LPVOID) &sentenceAndNumberOfThread,
-                NULL,
-                NULL
-        );
-        WaitForSingleObject(threads[i], INFINITE);
-
-        //ReleaseSemaphore(hSemaphore, 1, NULL); // or not null
-    }
-
-    WaitForMultipleObjects(numOfThreads, threads, TRUE, INFINITE);
-
-    for (size_t i = 0; i < numOfThreads; i++) {
-        CloseHandle(threads[i]);
-    }
-    CloseHandle(hSemaphore);
+    runCalculatingThreads(chunksOfSentences, THREAD_PRIORITY_HIGHEST);
 }
 
+//void limitThreads(size_t numOfThreads, vector<string> &chunksOfSentences) {
+//    if (numOfThreads > chunksOfSentences.size()) {
+//        cerr << "Cannot divide text where the number of sentences (" << chunksOfSentences.size() << ") is less than number of threads (" << numOfThreads << ")\n";
+//        return;
+//    }
+//
+//    HANDLE threads[numOfThreads];
+//    hSemaphore = CreateSemaphore(
+//            NULL,
+//            0, //or 1
+//            numOfThreads,
+//            NULL);
+//
+//    size_t chunkSize = chunksOfSentences.size();
+//    size_t sentencesInChunk = chunkSize / numOfThreads;
+//    size_t k = 0;
+//    SentenceAndThread sentenceAndNumberOfThread;
+//    for (size_t i = 0; i < numOfThreads; i++) {
+//        string multiSentence;
+//
+//        for (size_t j = k; j < sentencesInChunk; j++) {
+//            multiSentence += chunksOfSentences[j];
+//        }
+//
+//        k = sentencesInChunk;
+//        sentencesInChunk += chunkSize / numOfThreads;
+//
+//        if (chunkSize - sentencesInChunk < chunkSize / numOfThreads) {
+//            sentencesInChunk -= chunkSize / numOfThreads; // back
+//            for (size_t l = sentencesInChunk; l < chunkSize; l++) { // or sentInChunk+1
+//                multiSentence += chunksOfSentences[l];
+//            }
+//        }
+//
+//        sentenceAndNumberOfThread.sentence = multiSentence;
+//
+//        //WaitForSingleObject(hSemaphore, INFINITE);
+//
+//        threads[i] = CreateThread(
+//                NULL,
+//                0,
+//                findLongestSentence,
+//                (LPVOID) &sentenceAndNumberOfThread,
+//                NULL,
+//                NULL
+//        );
+//        WaitForSingleObject(threads[i], INFINITE);
+//
+//        //ReleaseSemaphore(hSemaphore, 1, NULL); // or not null
+//    }
+//
+//    WaitForMultipleObjects(numOfThreads, threads, TRUE, INFINITE);
+//
+//    for (size_t i = 0; i < numOfThreads; i++) {
+//        CloseHandle(threads[i]);
+//    }
+//    CloseHandle(hSemaphore);
+//}
+
 DWORD WINAPI findLongestSentence(LPVOID threadData) {
-    //WaitForSingleObject(hSemaphore, INFINITE); //not inf but 0L
+    WaitForSingleObject(hSemaphore, 0L);
+
     WaitForSingleObject(hMutex, INFINITE);
-    struct SentenceAndThread *tData =(struct SentenceAndThread *) threadData;
+//    SentenceAndThread *tData = (SentenceAndThread *)threadData;
+    SentenceAndThread *tData = static_cast<SentenceAndThread*>(threadData);
     string text = tData->sentence;
     assert(tData);
     ReleaseMutex(hMutex);
-//    size_t finalSizeOfVectorSentences = tData->numberOfChunks;
-//    size_t thread = tData->thread;
 
-    string longest = FindLongestSentenceInText(text); // the longest sentence in chunk
     delete tData;
+    string longest = FindLongestSentenceInText(text); // the longest sentence in chunk
+    ReleaseSemaphore(hSemaphore, 1, NULL);
 
-   // ReleaseSemaphore(hSemaphore, 1, NULL);
     WaitForSingleObject(hMutex, INFINITE);
-
     sentencesFoundByThreads.push_back(longest);
-
     ReleaseMutex(hMutex);
+
     ExitThread(0);
 }
 
@@ -297,26 +309,26 @@ VOID runCalculatingThreads(vector<string> &chunksOfSentences, int priority) {
         exit(1);
     }
 
-    SentenceAndThread sentenceAndNumberOfThread;
-    sentenceAndNumberOfThread.numberOfChunks = numberOfChunks;
+    //sentenceAndNumberOfThread->numberOfChunks = numberOfChunks;
     for (size_t i = 0; i < numberOfChunks; i++) {
-        sentenceAndNumberOfThread.sentence = chunksOfSentences[i];
-        sentenceAndNumberOfThread.thread = i;
+        SentenceAndThread *sentenceAndNumberOfThread = new SentenceAndThread();
+        sentenceAndNumberOfThread->sentence = chunksOfSentences[i];
+        sentenceAndNumberOfThread->thread = i;
 
         threads[i] = CreateThread(NULL,
                                   0,
                                   findLongestSentence,
-                                  (LPVOID) &sentenceAndNumberOfThread,
-                                  NULL,
+                                  (LPVOID)sentenceAndNumberOfThread,
+                                  0,
                                   NULL);
 
         if (threads[i] == NULL) {
             cout << GetLastError() << '\n';
             ExitProcess(3);
         }
-        //SetThreadPriority(threads[i], priority);
+        SetThreadPriority(threads[i], priority);
     }
-
+    WaitForMultipleObjects(numberOfChunks, threads, FALSE, INFINITE);
     bool threadsWorkFinished;
     do {
         WaitForSingleObject(hMutex, INFINITE);
@@ -331,10 +343,9 @@ VOID runCalculatingThreads(vector<string> &chunksOfSentences, int priority) {
         threadsWorkFinished = sentencesFoundByThreads.size() >= chunksOfSentences.size();
         ReleaseMutex(hMutex);
 
-        Sleep(10);
+        Sleep(1000);
     } while (!threadsWorkFinished);
 
-    WaitForMultipleObjects(numberOfChunks, threads, TRUE, INFINITE);
     cout << '\n';
 
     for (size_t i = 0; i < numberOfChunks; i++) {
@@ -359,10 +370,20 @@ string readTextFromFile(const string &fileName) {
 
 void saveResToFile(const string &fileName, const string &text, ll exeTime, size_t numberOfThreads) {
     fstream output;
-    output.open(fileName, std::ios_base::app);
+    output.open(fileName, std::ios_base::trunc | std::ios_base::out);
 
     output << "Longest sentence size = [" << CountWords(text) << "]\nSentence = [" << text << "]\n";
     output << "Executing time for [" <<  numberOfThreads << "] threads is [" << exeTime << "]ms\n\n";
+
+    output.close();
+}
+
+void saveResLimitToFile(const string &fileName, const string &text, ll exeTime, size_t numberOfThreads, size_t limitedThreads) {
+    fstream output;
+    output.open(fileName, std::ios_base::app);
+
+    output << "Longest sentence size = [" << CountWords(text) << "]\nSentence = [" << text << "]\n";
+    output << "Executing time for [" <<  numberOfThreads << "] threads where " << " was executing [" << limitedThreads << "] threads is [" << exeTime << "]ms\n\n";
 
     output.close();
 }
