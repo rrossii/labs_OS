@@ -22,10 +22,11 @@ void RunNThreads(size_t numberOfThreads);
 void deleteUnnecessarySymbols(string &text);
 string LongestSentenceInVector(const vector<string> &sentences);
 DWORD progressUpdateInPercents(size_t nowSizeOfVectorSentences, size_t finalSizeOfVectorSentences);
-string longestSentenceEverySecond();
+void limitThreads(size_t numOfThreads, vector<string> &chunksOfSentences);
 
 vector<string> sentencesFoundByThreads;
 HANDLE hMutex;
+HANDLE hSemaphore;
 
 uint64_t CurrentTimeMillis() {
     uint64_t ms = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count();
@@ -33,13 +34,13 @@ uint64_t CurrentTimeMillis() {
 }
 
 int main() {
-    RunNThreads(1);
-    RunNThreads(2);
+//    RunNThreads(1);
+//    RunNThreads(2);
     RunNThreads(4);
-    RunNThreads(8);
+//    RunNThreads(8);
     RunNThreads(20);
-    RunNThreads(100);
-    RunNThreads(1000);
+//    RunNThreads(100);
+//    RunNThreads(1000);
     return 0;
 }
 
@@ -173,11 +174,21 @@ void RunNThreads(size_t numberOfThreads) {
     auto endTime = CurrentTimeMillis();
 
     auto longest = LongestSentenceInVector(sentencesFoundByThreads);
-    cout << longest << "\n\n";
 
     string outputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\output.txt)";
-    //saveResToFile(outputFile, longest, endTime - startTime, numberOfThreads);
+    saveResToFile(outputFile, longest, endTime - startTime, numberOfThreads);
+    sentencesFoundByThreads.clear();
 
+    startTime = CurrentTimeMillis();
+
+    size_t limitedNumOfThread = 4;
+    limitThreads(limitedNumOfThread, chunksOfSentences);
+
+    endTime = CurrentTimeMillis();
+
+    longest = LongestSentenceInVector(sentencesFoundByThreads);
+
+    saveResToFile(outputFile, longest, endTime - startTime, limitedNumOfThread);
     sentencesFoundByThreads.clear();
 }
 
@@ -191,6 +202,60 @@ struct SentenceAndThread {
     size_t thread{};
 };
 
+void limitThreads(size_t numOfThreads, vector<string> &chunksOfSentences) {
+    HANDLE threads[numOfThreads];
+    hSemaphore = CreateSemaphore(
+            NULL,
+            0, //or 1
+            numOfThreads,
+            NULL);
+
+    size_t chunkSize = chunksOfSentences.size();
+    size_t sentencesInChunk = chunkSize / numOfThreads;
+    size_t k = 0;
+    SentenceAndThread sentenceAndNumberOfThread;
+    for (size_t i = 0; i < numOfThreads; i++) {
+        string multiSentence;
+
+        for (size_t j = k; j < sentencesInChunk; j++) {
+            multiSentence += chunksOfSentences[j];
+        }
+
+        k = sentencesInChunk;
+        sentencesInChunk += chunkSize / numOfThreads;
+
+        if (chunkSize - sentencesInChunk < chunkSize / numOfThreads) {
+            sentencesInChunk -= chunkSize / numOfThreads; // back
+            for (size_t l = sentencesInChunk; l < chunkSize; l++) { // or sentInChunk+1
+                multiSentence += chunksOfSentences[l];
+            }
+        }
+
+        sentenceAndNumberOfThread.sentence = multiSentence;
+
+        //WaitForSingleObject(hSemaphore, INFINITE);
+
+        threads[i] = CreateThread(
+                NULL,
+                0,
+                findLongestSentence,
+                (LPVOID) &sentenceAndNumberOfThread,
+                NULL,
+                NULL
+                );
+        WaitForSingleObject(threads[i], INFINITE);
+
+        //ReleaseSemaphore(hSemaphore, 1, NULL); // or not null
+    }
+
+    WaitForMultipleObjects(numOfThreads, threads, TRUE, INFINITE);
+
+    for (size_t i = 0; i < numOfThreads; i++) {
+        CloseHandle(threads[i]);
+    }
+    CloseHandle(hSemaphore);
+}
+
 DWORD WINAPI findLongestSentence(LPVOID threadData) {
     struct SentenceAndThread *tData = (struct SentenceAndThread *)threadData;
     string text = tData->sentence;
@@ -198,11 +263,13 @@ DWORD WINAPI findLongestSentence(LPVOID threadData) {
 //    size_t thread = tData->thread;
 
     //WaitForSingleObject(hMutex, INFINITE);
+    WaitForSingleObject(hSemaphore, 0L);
 
     string longest = FindLongestSentenceInText(text); // the longest sentence in chunk
     sentencesFoundByThreads.push_back(longest);
 
     //ReleaseMutex(hMutex);
+    ReleaseSemaphore(hSemaphore, 1, NULL);
 
     ExitThread(0);
 }
@@ -210,7 +277,16 @@ DWORD WINAPI findLongestSentence(LPVOID threadData) {
 VOID runCalculatingThreads(vector<string> &chunksOfSentences, int priority) {
     size_t numberOfChunks = chunksOfSentences.size();
     HANDLE threads[numberOfChunks];
-    hMutex = CreateMutex(NULL, FALSE, "longestSentence");
+
+    hMutex = CreateMutex(
+            NULL,
+            FALSE,
+            "longestSentence");
+
+    if (hMutex == NULL) {
+        cout << "CreateMutex error: %d\n" << GetLastError();
+        exit(1);
+    }
 
     DWORD threadID[numberOfChunks];
 
@@ -220,7 +296,7 @@ VOID runCalculatingThreads(vector<string> &chunksOfSentences, int priority) {
         sentenceAndNumberOfThread.sentence = chunksOfSentences[i];
         sentenceAndNumberOfThread.thread = i;
 
-        WaitForSingleObject(hMutex, INFINITE);
+        //WaitForSingleObject(hMutex, INFINITE);
 
         threads[i] = CreateThread(NULL,
                                   0,
@@ -234,14 +310,14 @@ VOID runCalculatingThreads(vector<string> &chunksOfSentences, int priority) {
         ResumeThread(threads[i]);
         WaitForSingleObject(threads[i], INFINITE);
 
-        if (sentencesFoundByThreads.size() <= chunksOfSentences.size()) {
-            cout << "progress: " << progressUpdateInPercents(sentencesFoundByThreads.size(), chunksOfSentences.size()) << "%\n";
-            Sleep(1000);
-        }
+//        if (sentencesFoundByThreads.size() <= chunksOfSentences.size()) {
+//            cout << "progress: " << progressUpdateInPercents(sentencesFoundByThreads.size(), chunksOfSentences.size()) << "%\n";
+//            Sleep(1000);
+//        }
+//
+//        cout << "The longest sentence by now: " << FindLongestSentenceInText(chunksOfSentences[i]) << "\n\n";
 
-        cout << "The longest sentence by now: " << FindLongestSentenceInText(chunksOfSentences[i]) << '\n';
-
-        ReleaseMutex(hMutex);
+        //ReleaseMutex(hMutex);
     }
     cout << '\n';
 

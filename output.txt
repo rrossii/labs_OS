@@ -1,28 +1,24 @@
-Longest sentence size = [9]
-Sentence = [ Diam ut venenatis tellus in metus vulputate eu scelerisque.]
-Executing time for [1] threads is [2]ms
+Longest sentence size = [20]
+Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
+Executing time for [20] threads is [2106]ms
 
-Longest sentence size = [9]
-Sentence = [ Diam ut venenatis tellus in metus vulputate eu scelerisque.]
-Executing time for [2] threads is [1]ms
+Longest sentence size = [20]
+Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
+Executing time for [20] threads is [2906]ms
 
-Longest sentence size = [9]
-Sentence = [ Diam ut venenatis tellus in metus vulputate eu scelerisque.]
-Executing time for [4] threads is [5]ms
+Longest sentence size = [20]
+Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
+Executing time for [4] threads is [1947]ms
 
-Longest sentence size = [9]
-Sentence = [ Diam ut venenatis tellus in metus vulputate eu scelerisque.]
-Executing time for [8] threads is [2]ms
+Longest sentence size = [20]
+Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
+Executing time for [4] threads is [2525]ms
 
-Longest sentence size = [9]
-Sentence = [ Diam ut venenatis tellus in metus vulputate eu scelerisque.]
-Executing time for [20] threads is [2]ms
+Longest sentence size = [20]
+Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
+Executing time for [20] threads is [1966]ms
 
-Longest sentence size = [9]
-Sentence = [ Diam ut venenatis tellus in metus vulputate eu scelerisque.]
-Executing time for [100] threads is [1]ms
-
-Longest sentence size = [9]
-Sentence = [ Diam ut venenatis tellus in metus vulputate eu scelerisque.]
-Executing time for [1000] threads is [2]ms
+Longest sentence size = [20]
+Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
+Executing time for [4] threads is [2577]ms
 
