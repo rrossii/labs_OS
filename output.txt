@@ -1,24 +1,152 @@
 Longest sentence size = [20]
 Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
-Executing time for [20] threads is [2106]ms
+Executing time for [4] threads is [1942]ms
 
 Longest sentence size = [20]
 Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
-Executing time for [20] threads is [2906]ms
+Executing time for [4] threads is [2514]ms
 
 Longest sentence size = [20]
 Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
-Executing time for [4] threads is [1947]ms
+Executing time for [20] threads is [1965]ms
 
 Longest sentence size = [20]
 Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
-Executing time for [4] threads is [2525]ms
+Executing time for [4] threads is [2569]ms
 
 Longest sentence size = [20]
 Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
-Executing time for [20] threads is [1966]ms
+Executing time for [4] threads is [2087]ms
+
+Longest sentence size = [0]
+Sentence = []
+Executing time for [5] threads is [1]ms
 
 Longest sentence size = [20]
 Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
-Executing time for [4] threads is [2577]ms
+Executing time for [20] threads is [2233]ms
+
+Longest sentence size = [20]
+Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
+Executing time for [5] threads is [4881]ms
+
+Longest sentence size = [20]
+Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
+Executing time for [4] threads is [2058]ms
+
+Longest sentence size = [0]
+Sentence = []
+Executing time for [5] threads is [0]ms
+
+Longest sentence size = [20]
+Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
+Executing time for [20] threads is [2083]ms
+
+Longest sentence size = [20]
+Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
+Executing time for [5] threads is [2606]ms
+
+Longest sentence size = [20]
+Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
+Executing time for [4] threads is [8308]ms
+
+Longest sentence size = [20]
+Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
+Executing time for [4] threads is [2152]ms
+
+Longest sentence size = [20]
+Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
+Executing time for [20] threads is [2168]ms
+
+Longest sentence size = [20]
+Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
+Executing time for [4] threads is [2311]ms
+
+Longest sentence size = [20]
+Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
+Executing time for [20] threads is [2310]ms
+
+Longest sentence size = [9]
+Sentence = [ Diam ut venenatis tellus in metus vulputate eu scelerisque.]
+Executing time for [4] threads is [116]ms
+
+Longest sentence size = [9]
+Sentence = [ Diam ut venenatis tellus in metus vulputate eu scelerisque.]
+Executing time for [20] threads is [125]ms
+
+Longest sentence size = [9]
+Sentence = [ Diam ut venenatis tellus in metus vulputate eu scelerisque.]
+Executing time for [4] threads is [62]ms
+
+Longest sentence size = [5]
+Sentence = [ Nisl rhoncus mattis rhoncus urna.]
+Executing time for [20] threads is [60]ms
+
+Longest sentence size = [9]
+Sentence = [ Diam ut venenatis tellus in metus vulputate eu scelerisque.]
+Executing time for [4] threads is [54]ms
+
+Longest sentence size = [8]
+Sentence = [
+A condimentum vitae sapien pellentesque habitant morbi tristique.]
+Executing time for [20] threads is [61]ms
+
+Longest sentence size = [9]
+Sentence = [ Diam ut venenatis tellus in metus vulputate eu scelerisque.]
+Executing time for [4] threads is [13012]ms
+
+Longest sentence size = [9]
+Sentence = [ Diam ut venenatis tellus in metus vulputate eu scelerisque.]
+Executing time for [4] threads is [62]ms
+
+Longest sentence size = [9]
+Sentence = [ Diam ut venenatis tellus in metus vulputate eu scelerisque.]
+Executing time for [20] threads is [62]ms
+
+Longest sentence size = [8]
+Sentence = [
+A condimentum vitae sapien pellentesque habitant morbi tristique.]
+Executing time for [20] threads is [60]ms
+
+Longest sentence size = [9]
+Sentence = [ Diam ut venenatis tellus in metus vulputate eu scelerisque.]
+Executing time for [20] threads is [138]ms
+
+Longest sentence size = [8]
+Sentence = [
+A condimentum vitae sapien pellentesque habitant morbi tristique.]
+Executing time for [20] threads is [44]ms
+
+Longest sentence size = [8]
+Sentence = [
+Dui vivamus arcu felis bibendum ut tristique et.]
+Executing time for [20] threads is [43]ms
+
+Longest sentence size = [9]
+Sentence = [ Diam ut venenatis tellus in metus vulputate eu scelerisque.]
+Executing time for [5] threads is [1]ms
+
+Longest sentence size = [0]
+Sentence = []
+Executing time for [20] threads is [53]ms
+
+Longest sentence size = [20]
+Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
+Executing time for [5] threads is [2513]ms
+
+Longest sentence size = [0]
+Sentence = []
+Executing time for [20] threads is [64]ms
+
+Longest sentence size = [0]
+Sentence = []
+Executing time for [5] threads is [128]ms
+
+Longest sentence size = [20]
+Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
+Executing time for [20] threads is [569]ms
+
+Longest sentence size = [20]
+Sentence = [ Habitasse platea dictumst quisque sagittis purus sit amet volutpat consequat sagittis purus sit amet volutpat consequat velit laoreet id donec.]
+Executing time for [5] threads is [2457]ms
 
