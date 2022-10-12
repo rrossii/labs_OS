@@ -5,3 +5,4 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_executable(lab3_OS main.cpp)
 add_executable(generator textGenerator.cpp)
+add_executable(tmp tmp.cpp)

@@ -21,8 +21,11 @@ size_t CountWords(const string &sentence);
 void RunNThreads(size_t numberOfThreads);
 void deleteUnnecessarySymbols(string &text);
 string LongestSentenceInVector(const vector<string> &sentences);
+DWORD progressUpdateInPercents(size_t nowSizeOfVectorSentences, size_t finalSizeOfVectorSentences);
+string longestSentenceEverySecond();
 
 vector<string> sentencesFoundByThreads;
+HANDLE hMutex;
 
 uint64_t CurrentTimeMillis() {
     uint64_t ms = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count();
@@ -84,7 +87,6 @@ vector<string> divideTextIntoChunksOfSentences(const string &text, size_t parts)
             dividedText.emplace_back(multiSentence);
         }
 
-        index = startOfSentence;
         for (size_t i = 0; i < leftoverSentences; i++) {
             if (index + 1 >= numberOfSentencesInText) {
                 break;
@@ -93,7 +95,7 @@ vector<string> divideTextIntoChunksOfSentences(const string &text, size_t parts)
             indexOfEndOfSentence = endOfSentence[index + 1];
             size_t numOfCharsToEmplace = indexOfEndOfSentence - startOfSentence + 1;
 
-            multiSentence += text.substr(startOfSentence, numOfCharsToEmplace);
+            multiSentence += text.substr(startOfSentence + 1, numOfCharsToEmplace); // was startOfSentence
             index++;
             startOfSentence = indexOfEndOfSentence;
 
@@ -148,25 +150,6 @@ size_t CountWords(const string &sentence) {
     return countWords;
 }
 
-struct SentenceAndThread {
-    string sentence;
-    size_t thread{};
-};
-
-DWORD WINAPI findLongestSentence(LPVOID threadData) {
-
-    struct SentenceAndThread *tData = (struct SentenceAndThread *)threadData;
-    string text = tData->sentence;
-    size_t threadNum = tData->thread;
-
-
-    string longest = FindLongestSentenceInText(text); // the longest sentence in chunk
-    sentencesFoundByThreads[threadNum] = longest;
-
-    ExitThread(0);
-//    return 0;
-}
-
 void deleteUnnecessarySymbols(string &text) {
     string::iterator iter = unique(text.begin(), text.end(), [](auto lhs, auto rhs){
         return lhs == rhs && lhs == ' '; // add later \n also
@@ -174,53 +157,14 @@ void deleteUnnecessarySymbols(string &text) {
     text.erase(iter, text.end() );
 }
 
-VOID runCalculatingThreads(vector<string> &chunksOfSentences, int priority) {
-    size_t numberOfChunks = chunksOfSentences.size();
-    HANDLE threads[numberOfChunks];
-    HANDLE openThreads;
-    DWORD threadID[numberOfChunks];
-
-    SentenceAndThread sentenceAndNumberOfThread;
-    for (size_t i = 0; i < numberOfChunks; i++) {
-        sentenceAndNumberOfThread.sentence = chunksOfSentences[i];
-        sentenceAndNumberOfThread.thread = i;
-
-        threads[i] = CreateThread(NULL,
-                                  0,
-                                  findLongestSentence,
-                                  (LPVOID) &sentenceAndNumberOfThread,
-                                  CREATE_SUSPENDED,
-                                  &threadID[i]);
-//
-//        openThreads = OpenThread(THREAD_SET_INFORMATION,
-//                                    FALSE,
-//                                    threadID[i]);
-
-//        if (openThreads == NULL) {
-//            cerr << "Open thread " << i << " failed, error is " << GetLastError() << '\n';
-//        }
-        SetThreadPriority(threads[i], priority);
-
-        ResumeThread(threads[i]);
-//        WaitForSingleObject(openThreads, INFINITE);
-        WaitForSingleObject(threads[i], INFINITE);
-    }
-    WaitForMultipleObjects(numberOfChunks, threads, TRUE, INFINITE);
-
-    for (size_t i = 0; i < numberOfChunks; i++) {
-        CloseHandle(threads[i]);
-    }
-}
-
 void RunNThreads(size_t numberOfThreads) {
 //    string inputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\text.txt)";
-    string inputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\text1.txt)";
-//    string inputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\text2.txt)";
+//    string inputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\text1.txt)";
+    string inputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\text2.txt)";
     string text = readTextFromFile(inputFile);
 
     deleteUnnecessarySymbols(text);
     vector<string> chunksOfSentences = divideTextIntoChunksOfSentences(text, numberOfThreads);
-    sentencesFoundByThreads.assign(chunksOfSentences.size(), "");
 
     auto startTime = CurrentTimeMillis();
 
@@ -229,9 +173,83 @@ void RunNThreads(size_t numberOfThreads) {
     auto endTime = CurrentTimeMillis();
 
     auto longest = LongestSentenceInVector(sentencesFoundByThreads);
+    cout << longest << "\n\n";
 
     string outputFile = R"(C:\Users\annro\CLionProjects\lab3_OS\output.txt)";
-    saveResToFile(outputFile, longest, endTime - startTime, numberOfThreads);
+    //saveResToFile(outputFile, longest, endTime - startTime, numberOfThreads);
+
+    sentencesFoundByThreads.clear();
+}
+
+DWORD progressUpdateInPercents(size_t nowSizeOfVectorSentences, size_t finalSizeOfVectorSentences) {
+    return (nowSizeOfVectorSentences * 100) / finalSizeOfVectorSentences;
+}
+
+struct SentenceAndThread {
+    string sentence;
+    size_t numberOfChunks{};
+    size_t thread{};
+};
+
+DWORD WINAPI findLongestSentence(LPVOID threadData) {
+    struct SentenceAndThread *tData = (struct SentenceAndThread *)threadData;
+    string text = tData->sentence;
+//    size_t finalSizeOfVectorSentences = tData->numberOfChunks;
+//    size_t thread = tData->thread;
+
+    //WaitForSingleObject(hMutex, INFINITE);
+
+    string longest = FindLongestSentenceInText(text); // the longest sentence in chunk
+    sentencesFoundByThreads.push_back(longest);
+
+    //ReleaseMutex(hMutex);
+
+    ExitThread(0);
+}
+
+VOID runCalculatingThreads(vector<string> &chunksOfSentences, int priority) {
+    size_t numberOfChunks = chunksOfSentences.size();
+    HANDLE threads[numberOfChunks];
+    hMutex = CreateMutex(NULL, FALSE, "longestSentence");
+
+    DWORD threadID[numberOfChunks];
+
+    SentenceAndThread sentenceAndNumberOfThread;
+    sentenceAndNumberOfThread.numberOfChunks = numberOfChunks;
+    for (size_t i = 0; i < numberOfChunks; i++) {
+        sentenceAndNumberOfThread.sentence = chunksOfSentences[i];
+        sentenceAndNumberOfThread.thread = i;
+
+        WaitForSingleObject(hMutex, INFINITE);
+
+        threads[i] = CreateThread(NULL,
+                                  0,
+                                  findLongestSentence,
+                                  (LPVOID) &sentenceAndNumberOfThread,
+                                  CREATE_SUSPENDED,
+                                  &threadID[i]);
+
+        SetThreadPriority(threads[i], priority);
+
+        ResumeThread(threads[i]);
+        WaitForSingleObject(threads[i], INFINITE);
+
+        if (sentencesFoundByThreads.size() <= chunksOfSentences.size()) {
+            cout << "progress: " << progressUpdateInPercents(sentencesFoundByThreads.size(), chunksOfSentences.size()) << "%\n";
+            Sleep(1000);
+        }
+
+        cout << "The longest sentence by now: " << FindLongestSentenceInText(chunksOfSentences[i]) << '\n';
+
+        ReleaseMutex(hMutex);
+    }
+    cout << '\n';
+
+    WaitForMultipleObjects(numberOfChunks, threads, TRUE, INFINITE);
+
+    for (size_t i = 0; i < numberOfChunks; i++) {
+        CloseHandle(threads[i]);
+    }
 }
 
 string readTextFromFile(const string &fileName) {

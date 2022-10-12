@@ -1,28 +1,28 @@
-Longest sentence size = [8]
-Sentence = [Quis blandit turpis cursus in hac habitasse platea.]
-Executing time for [1] threads is [0]ms
+Longest sentence size = [9]
+Sentence = [ Diam ut venenatis tellus in metus vulputate eu scelerisque.]
+Executing time for [1] threads is [2]ms
 
-Longest sentence size = [8]
-Sentence = [Quis blandit turpis cursus in hac habitasse platea.]
-Executing time for [2] threads is [0]ms
+Longest sentence size = [9]
+Sentence = [ Diam ut venenatis tellus in metus vulputate eu scelerisque.]
+Executing time for [2] threads is [1]ms
 
-Longest sentence size = [8]
-Sentence = [Quis blandit turpis cursus in hac habitasse platea.]
-Executing time for [4] threads is [2]ms
+Longest sentence size = [9]
+Sentence = [ Diam ut venenatis tellus in metus vulputate eu scelerisque.]
+Executing time for [4] threads is [5]ms
 
-Longest sentence size = [8]
-Sentence = [Quis blandit turpis cursus in hac habitasse platea.]
-Executing time for [8] threads is [0]ms
+Longest sentence size = [9]
+Sentence = [ Diam ut venenatis tellus in metus vulputate eu scelerisque.]
+Executing time for [8] threads is [2]ms
 
-Longest sentence size = [8]
-Sentence = [Quis blandit turpis cursus in hac habitasse platea.]
-Executing time for [20] threads is [1]ms
+Longest sentence size = [9]
+Sentence = [ Diam ut venenatis tellus in metus vulputate eu scelerisque.]
+Executing time for [20] threads is [2]ms
 
-Longest sentence size = [8]
-Sentence = [Quis blandit turpis cursus in hac habitasse platea.]
-Executing time for [100] threads is [2]ms
+Longest sentence size = [9]
+Sentence = [ Diam ut venenatis tellus in metus vulputate eu scelerisque.]
+Executing time for [100] threads is [1]ms
 
-Longest sentence size = [8]
-Sentence = [Quis blandit turpis cursus in hac habitasse platea.]
-Executing time for [1000] threads is [1]ms
+Longest sentence size = [9]
+Sentence = [ Diam ut venenatis tellus in metus vulputate eu scelerisque.]
+Executing time for [1000] threads is [2]ms
 
